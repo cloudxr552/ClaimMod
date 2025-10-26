@@ -1,0 +1,13 @@
+name: ClaimMod
+version: 1.0
+main: com.cloudstudio.claimmod.ClaimMod
+api-version: 1.21
+commands:
+  claim:
+    description: Claim an area
+  unclaim:
+    description: Unclaim your area
+  1:
+    description: Set position 1
+  2:
+    description: Set position 2
