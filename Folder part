@@ -1,0 +1,71 @@
+package com.cloudstudio.claimmod;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.*;
+
+public class ClaimMod extends JavaPlugin {
+    private final Map<UUID, Block> pos1 = new HashMap<>();
+    private final Map<UUID, Block> pos2 = new HashMap<>();
+    private final List<Claim> claims = new ArrayList<>();
+
+    @Override
+    public void onEnable() {
+        Bukkit.getLogger().info("[ClaimMod] Enabled!");
+        Bukkit.getPluginManager().registerEvents(new ProtectionListener(claims), this);
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (!(sender instanceof Player)) return false;
+        Player player = (Player) sender;
+
+        if (!player.isOp()) {
+            player.sendMessage(ChatColor.RED + "Only OPs can use ClaimMod commands.");
+            return true;
+        }
+
+        if (cmd.getName().equalsIgnoreCase("claim")) {
+            Block b1 = pos1.get(player.getUniqueId());
+            Block b2 = pos2.get(player.getUniqueId());
+            if (b1 == null || b2 == null) {
+                player.sendMessage(ChatColor.RED + "Set both positions first using //1 and //2!");
+                return true;
+            }
+            claims.add(new Claim(b1, b2, player.getUniqueId()));
+            player.sendMessage(ChatColor.GREEN + "Claim created!");
+            return true;
+        }
+
+        if (cmd.getName().equalsIgnoreCase("unclaim")) {
+            claims.removeIf(c -> c.owner.equals(player.getUniqueId()));
+            player.sendMessage(ChatColor.YELLOW + "Your claims have been removed!");
+            return true;
+        }
+
+        if (cmd.getName().equalsIgnoreCase("1")) {
+            Block block = player.getLocation().getBlock();
+            pos1.put(player.getUniqueId(), block);
+            block.setType(Material.RED_STAINED_GLASS);
+            player.sendMessage(ChatColor.AQUA + "Position 1 set!");
+            return true;
+        }
+
+        if (cmd.getName().equalsIgnoreCase("2")) {
+            Block block = player.getLocation().getBlock();
+            pos2.put(player.getUniqueId(), block);
+            block.setType(Material.RED_STAINED_GLASS);
+            player.sendMessage(ChatColor.AQUA + "Position 2 set!");
+            return true;
+        }
+
+        return false;
+    }
+}
